@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivina el Campeón - LoL</title>
+    <!-- Tailwind CSS para estilos rápidos y responsivos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome para los iconos de redes sociales y trofeos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2kQJ2fF08P/j2F/b2bYwP8eI/c5y+j2I/a/wA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1b2028 0%, #23283a 100%);
+            color: #e6edf3;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            background: rgba(18, 22, 31, 0.95);
+            border: 1px solid #2f343e;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            margin: 0 auto;
+        }
+
+        /* Actualiza los estilos de la navbar */
+.navbar {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 0;
+}
+
+/* Ajusta el contenedor principal para compensar la navbar fija */
+.main-layout {
+    padding-top: 4rem; /* Ajusta este valor según la altura de tu navbar */
+    margin: 0;
+    width: 100%;
+}
+
+/* Ajusta el body para eliminar márgenes por defecto */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Ajusta el contenedor de la navbar para centrar el contenido */
+.navbar > div {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Ajusta el scoreboard para que no quede debajo de la navbar */
+.scoreboard-section {
+    margin-top: 1rem;
+}
+
+        .navbar {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ability-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 12px;
+            border: 4px solid #7966ff;
+            box-shadow: 0 0 15px rgba(121, 102, 255, 0.4);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        .ability-image.correct-flash {
+            animation: correct-pulse 0.5s ease;
+        }
+        .ability-image.incorrect-shake {
+            animation: shake 0.3s ease;
+        }
+        @keyframes correct-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(121, 102, 255, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(40, 167, 69, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 15px rgba(121, 102, 255, 0.4); }
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        .answer-button {
+            background: rgba(45, 55, 72, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .answer-button:hover:not(.disabled) {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 10px 20px rgba(121, 102, 255, 0.2);
+            border-color: rgba(121, 102, 255, 0.5);
+        }
+
+        .answer-button.correct {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border-color: #28a745;
+        }
+
+        .answer-button.incorrect {
+            background: linear-gradient(45deg, #dc3545, #c92020);
+            border-color: #dc3545;
+        }
+
+        .answer-button.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .start-button {
+            transition: all 0.2s ease;
+            background: linear-gradient(90deg, #7966ff, #9933ff);
+            box-shadow: 0 5px 20px rgba(121, 102, 255, 0.5);
+        }
+        .start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(121, 102, 255, 0.8);
+        }
+        .score-display {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(90deg, #7966ff 60%, #9933ff 100%);
+            padding: 0.5rem 1.2rem;
+            border-radius: 9999px;
+            box-shadow: 0 0 12px rgba(121, 102, 255, 0.4);
+            z-index: 10;
+        }
+        .feedback-message {
+            margin-top: 1.5rem;
+            min-height: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background: rgba(18, 22, 31, 0.95);
+            border: 1px solid #2f343e;
+        }
+        .social-button {
+            transition: all 0.2s ease;
+            color: #e6edf3;
+            background-color: #20242a;
+            padding: 0.75rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .social-button::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.3s;
+        }
+        .social-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(121, 102, 255, 0.3);
+        }
+        .social-button:hover::after {
+            transform: translateX(100%);
+        }
+        #loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #7966ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Ajustes responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .score-display {
+                top: 0.5rem;
+                right: 0.5rem;
+                font-size: 1rem;
+                padding: 0.4rem 1rem;
+            }
+        }
+
+        /* Nuevos estilos para la disposición principal */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr; /* Una sola columna por defecto */
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-top: 5rem; /* Ajusta este valor según la altura de tu navbar */
+            min-height: calc(100vh - 4rem); /* Ajusta la altura del contenido */
+        }
+
+        .scoreboard-section {
+            background: rgba(18, 22, 31, 0.95);
+            border: 1px solid #2f343e;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem; /* Espacio para separar en móvil */
+            top: 5rem; /* Ajusta este valor para que esté debajo de la navbar */
+        }
+        
+        .game-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        /* Icono del trofeo en el scoreboard */
+        .fa-trophy {
+            font-size: 1.2rem;
+            vertical-align: middle;
+        }
+
+        /* En pantallas más grandes, usar dos columnas */
+        @media (min-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 350px 1fr;
+                min-height: 100vh;
+            }
+            .scoreboard-section {
+                position: sticky;
+                top: 1rem;
+                height: calc(100vh - 2rem);
+                overflow-y: auto;
+                margin-bottom: 0;
+            }
+        }
+
+        #champGenModal {
+            backdrop-filter: blur(5px);
+        }
+
+        /* Agregar estos estilos CSS */
+        .role-button {
+            background: rgba(35, 40, 58, 0.8);
+            border: 2px solid #2f343e;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            color: #e6edf3;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .role-button:hover {
+            border-color: #7966ff;
+            background: rgba(35, 40, 58, 0.95);
+            transform: translateY(-2px);
+        }
+
+        .role-button.selected {
+            border-color: #7966ff;
+            background: rgba(121, 102, 255, 0.2);
+            box-shadow: 0 0 15px rgba(121, 102, 255, 0.3);
+        }
+
+        /* Agrega estos estilos */
+.glass-card {
+    background: rgba(17, 25, 40, 0.75);
+    backdrop-filter: blur(16px);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.125);
+    padding: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+}
+
+.glow-effect {
+    position: relative;
+}
+
+.glow-effect::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(45deg, #7966ff, #ff66d8, #7966ff);
+    border-radius: inherit;
+    z-index: -1;
+    animation: glow 1.5s linear infinite;
+}
+
+@keyframes glow {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+/* Agrega estas animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease forwards;
+}
+
+/* Agrega estos media queries */
+@media (max-width: 640px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0.5rem;
+    }
+
+    .glass-card {
+        padding: 1rem;
+    }
+
+    .navbar {
+        padding: 0.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .main-layout {
+        grid-template-columns: 350px 1fr;
+        gap: 2rem;
+    }
+
+    .scoreboard-section {
+        position: sticky;
+        top: 5rem;
+    }
+}
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Actualiza la navbar -->
+<nav class="navbar">
+    <div class="max-w-7xl mx-auto flex justify-between items-center py-3 px-4 w-full">
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+            Quiz of legends
+        </h1>
+        <div class="flex gap-4">
+            <a href="#" target="_blank" class="social-button hover:text-pink-500 group">
+                <i class="fab fa-instagram text-2xl group-hover:scale-110 transition-transform"></i>
+            </a>
+            <a href="#" target="_blank" class="social-button hover:text-blue-500 group">
+                <i class="fab fa-tiktok text-2xl group-hover:scale-110 transition-transform"></i>
+            </a>
+            <button id="champGenButton" class="social-button hover:text-yellow-400 group">
+                <i class="fas fa-dice text-2xl group-hover:scale-110 transition-transform"></i>
+            </button>
+            <button id="triviaButton" class="social-button hover:text-green-400 group">
+                <i class="fas fa-question text-2xl group-hover:scale-110 transition-transform"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+    <div class="main-layout">
+        <!-- Scoreboard Section -->
+        <aside class="scoreboard-section glass-card">
+            <div class="flex items-center gap-3 mb-6">
+                <i class="fas fa-trophy text-2xl text-yellow-400"></i>
+                <h3 class="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
+                    Top Jugadores
+                </h3>
+            </div>
+            <div class="space-y-3" id="scoreboard">
+                <!-- Los scores se llenan con JS -->
+            </div>
+        </aside>
+
+        <!-- Game Section -->
+        <main class="game-section">
+            <h2 class="text-3xl md:text-4xl font-extrabold mb-4 text-center text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600">
+                Skill Quiz League Of Legends
+            </h2>
+            
+
+            <div id="app" class="container relative">
+                <div id="score-display" class="score-display left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-8 top-6 md:top-6 z-20">
+                    Puntuación: 0
+                </div>
+                <h1 class="text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">Adivina la Habilidad</h1>
+                <!-- Pantalla de inicio -->
+                <div id="start-screen">
+                    <p class="text-xl mb-8 text-gray-400">¿Puedes identificar al campeón por una de sus habilidades?</p>
+                    <input id="playerName" type="text" maxlength="20" placeholder="Tu nombre" class="mb-4 w-full px-4 py-2 rounded-lg bg-[#23283a] text-white text-lg outline-none border border-[#2f343e] focus:border-[#7966ff] transition" autocomplete="off">
+                    <button id="startButton" class="start-button text-white font-bold py-4 px-8 rounded-full text-xl hover:scale-105 transition-transform">
+                        ¡Empezar!
+                    </button>
+                </div>
+                <!-- Pantalla de carga -->
+                
+                <!-- Pantalla del juego -->
+                <div id="game-screen" class="hidden w-full text-center">
+                    <p class="text-xl mb-4 font-bold text-gray-300">¿A qué campeón pertenece esta habilidad?</p>
+                    <img id="ability-image" src="" alt="Habilidad de Campeón" class="ability-image mx-auto" onerror="this.onerror=null; this.src='https://placehold.co/150x150/12161f/e6edf3?text=Error';">
+                    <div id="answers-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                        <!-- Los botones de respuesta se generarán aquí -->
+                    </div>
+                    <div id="feedback-message" class="feedback-message text-center"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Agrega el modal del generador después del div.main-layout -->
+    <div id="champGenModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="glass-card max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-yellow-400">EL chat elige tu campeon</h2>
+                <button id="closeChampGen" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            
+            <!-- Agregar selección de rol -->
+            <div class="mb-8">
+                <p class="text-gray-400 mb-4">Selecciona un rol:</p>
+                <div class="grid grid-cols-3 gap-2">
+                    <button class="role-button" data-role="top">
+                        <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-top.png" 
+                             alt="Top" class="w-8 h-8 mx-auto mb-1">
+                        <span>Top</span>
+                    </button>
+                    <button class="role-button" data-role="jungle">
+                        <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-jungle.png" 
+                             alt="Jungla" class="w-8 h-8 mx-auto mb-1">
+                        <span>Jungla</span>
+                    </button>
+                    <button class="role-button" data-role="mid">
+                        <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-middle.png" 
+                             alt="Mid" class="w-8 h-8 mx-auto mb-1">
+                        <span>Mid</span>
+                    </button>
+                    <button class="role-button" data-role="adc">
+                        <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-bottom.png" 
+                             alt="ADC" class="w-8 h-8 mx-auto mb-1">
+                        <span>ADC</span>
+                    </button>
+                    <button class="role-button" data-role="support">
+                        <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-utility.png" 
+                             alt="Support" class="w-8 h-8 mx-auto mb-1">
+                        <span>Support</span>
+                    </button>
+                    <button class="role-button" data-role="random">
+                        <i class="fas fa-random text-2xl mb-1"></i>
+                        <span>Random</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="result-container" class="mb-8">
+                <p id="champion-display" class="text-4xl font-extrabold text-blue-400 transition-all duration-300 transform scale-100">
+                    ¿Qué vas a jugar hoy?
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Trivia General -->
+    <div id="triviaModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl text-center max-w-2xl w-full border border-gray-700 mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-green-400">Trivia LoL</h2>
+                <button id="closeTrivia" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            
+            <div id="triviaContainer" class="mb-8">
+                <p id="triviaQuestion" class="text-2xl font-bold text-white mb-6"></p>
+                <div id="triviaOptions" class="grid grid-cols-1 gap-4"></div>
+            </div>
+            
+            <div id="triviaFeedback" class="hidden mb-6 p-4 rounded-lg bg-gray-700">
+                <p id="triviaExplanation" class="text-lg text-gray-200"></p>
+            </div>
+            
+            <div class="flex justify-between items-center mt-4">
+                <p id="triviaScore" class="text-xl font-bold text-green-400">Puntuación: 0/0</p>
+                <button id="nextTrivia" class="px-6 py-2 bg-green-500 text-white rounded-full hidden hover:bg-green-600 transition-colors">
+                    Siguiente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Definir las preguntas directamente sin usar fetch
+const questions = [
+    // Aatrox
+    {
+        abilityImage: "./assets/abilities/aatrox/aatrox-q.png",
+        correctChampion: "Aatrox",
+        options: ["Aatrox", "Riven", "Darius", "Garen"],
+        abilityName: "La Espada Darkin",
+        abilityDescription: "Aatrox golpea con su espada, causando daño físico. Puede lanzarse hasta tres veces."
+    },
+    {
+        abilityImage: "./assets/abilities/aatrox/aatrox-w.png",
+        correctChampion: "Aatrox",
+        options: ["Aatrox", "Darius", "Mordekaiser", "Sett"],
+        abilityName: "Cadenas Infernales",
+        abilityDescription: "Aatrox lanza cadenas que ralentizan y pueden arrastrar al enemigo de vuelta."
+    },
+    {
+        abilityImage: "./assets/abilities/aatrox/aatrox-e.png",
+        correctChampion: "Aatrox",
+        options: ["Aatrox", "Gnar", "Riven", "Renekton"],
+        abilityName: "Paso Umbral",
+        abilityDescription: "Aatrox se desplaza y gana poder de ataque."
+    },
+    {
+        abilityImage: "./assets/abilities/aatrox/aatrox-r.png",
+        correctChampion: "Aatrox",
+        options: ["Aatrox", "Swain", "Vladimir", "Kayn"],
+        abilityName: "Destructor de Mundos",
+        abilityDescription: "Aatrox libera su forma demoníaca, ganando velocidad y daño."
+    },
+    // Ahri
+    {
+        abilityImage: "./assets/abilities/ahri/ahri-q.png",
+        correctChampion: "Ahri",
+        options: ["Ahri", "Lux", "Orianna", "Syndra"],
+        abilityName: "Orbe del Engaño",
+        abilityDescription: "Ahri lanza su orbe, causando daño mágico a la ida y daño verdadero al regreso."
+    },
+    {
+        abilityImage: "./assets/abilities/ahri/ahri-w.png",
+        correctChampion: "Ahri",
+        options: ["Ahri", "LeBlanc", "Lissandra", "Karma"],
+        abilityName: "Fuego Zorruno",
+        abilityDescription: "Ahri libera tres fuegos fatuos que persiguen y dañan a los enemigos cercanos."
+    },
+    {
+        abilityImage: "./assets/abilities/ahri/ahri-e.png",
+        correctChampion: "Ahri",
+        options: ["Ahri", "Evelynn", "Seraphine", "Lux"],
+        abilityName: "Encanto",
+        abilityDescription: "Ahri lanza un beso que encanta y daña al enemigo alcanzado."
+    },
+    {
+        abilityImage: "./assets/abilities/ahri/ahri-r.png",
+        correctChampion: "Ahri",
+        options: ["Ahri", "Kassadin", "LeBlanc", "Katarina"],
+        abilityName: "Impulso Espiritual",
+        abilityDescription: "Ahri se impulsa en la dirección elegida y dispara esencias. Puede usarse hasta tres veces."
+    },
+    // Akali
+    {
+        abilityImage: "./assets/abilities/akali/akali-q.png",
+        correctChampion: "Akali",
+        options: ["Akali", "Kennen", "Zed", "Shen"],
+        abilityName: "Marca de los Asesinos",
+        abilityDescription: "Akali lanza kunais en abanico, causando daño y ralentización."
+    },
+    {
+        abilityImage: "./assets/abilities/akali/akali-w.png",
+        correctChampion: "Akali",
+        options: ["Akali", "Twitch", "Pyke", "Kaisa"],
+        abilityName: "Velo del Crepúsculo",
+        abilityDescription: "Akali crea una nube de humo que la oculta y le da energía."
+    },
+    {
+        abilityImage: "./assets/abilities/akali/akali-e.png",
+        correctChampion: "Akali",
+        options: ["Akali", "Katarina", "Talon", "Kayn"],
+        abilityName: "Ráfaga Shuriken",
+        abilityDescription: "Akali lanza un shuriken y puede reactivar para lanzarse hacia el objetivo marcado."
+    },
+    {
+        abilityImage: "./assets/abilities/akali/akali-r.png",
+        correctChampion: "Akali",
+        options: ["Akali", "Zed", "Kayn", "Talon"],
+        abilityName: "Ejecución Perfecta",
+        abilityDescription: "Akali se lanza hacia un campeón enemigo, causando daño masivo."
+    },
+    // Annie
+    {
+        abilityImage: "./assets/abilities/annie/annie-q.png",
+        correctChampion: "Annie",
+        options: ["Annie", "Brand", "Veigar", "Lux"],
+        abilityName: "Desintegrar",
+        abilityDescription: "Annie lanza una bola de fuego que daña al objetivo y recupera maná si mata a la unidad."
+    },
+    {
+        abilityImage: "./assets/abilities/annie/annie-w.png",
+        correctChampion: "Annie",
+        options: ["Annie", "Brand", "Lillia", "Karma"],
+        abilityName: "Incinerar",
+        abilityDescription: "Annie libera un cono de fuego que daña a los enemigos en el área."
+    },
+    // Ashe
+    {
+        abilityImage: "./assets/abilities/ashe/ashe-q.png",
+        correctChampion: "Ashe",
+        options: ["Ashe", "Varus", "Caitlyn", "Jinx"],
+        abilityName: "Concentración",
+        abilityDescription: "Ashe carga sus flechas con hielo, aumentando su velocidad de ataque."
+    },
+    {
+        abilityImage: "./assets/abilities/ashe/ashe-w.png",
+        correctChampion: "Ashe",
+        options: ["Ashe", "Varus", "Miss Fortune", "Kalista"],
+        abilityName: "Disparo de Volea",
+        abilityDescription: "Ashe dispara una lluvia de flechas en cono que ralentiza a los enemigos."
+    },
+    // Brand
+    {
+        abilityImage: "./assets/abilities/brand/brand-q.png",
+        correctChampion: "Brand",
+        options: ["Brand", "Annie", "Xerath", "Vel'Koz"],
+        abilityName: "Llamarada",
+        abilityDescription: "Brand lanza una bola de fuego que aturde si el objetivo está ardiendo."
+    },
+    {
+        abilityImage: "./assets/abilities/brand/brand-w.png",
+        correctChampion: "Brand",
+        options: ["Brand", "Ziggs", "Xerath", "Viktor"],
+        abilityName: "Pilar de Llama",
+        abilityDescription: "Brand invoca un pilar de fuego en el área objetivo después de un breve retraso."
+    },
+ {
+        abilityImage: "./assets/abilities/brand/brand-e.png",
+        correctChampion: "Brand",
+        options: ["Brand", "Annie", "Lux", "Malzahar"],
+        abilityName: "Conflagración",
+        abilityDescription: "Brand incendia al objetivo, causando daño mágico. Si el objetivo está ardiendo, el fuego se propaga a los enemigos cercanos."
+    },
+    {
+        abilityImage: "./assets/abilities/brand/brand-r.png",
+        correctChampion: "Brand",
+        options: ["Brand", "Zyra", "Vel'Koz", "Malzahar"],
+        abilityName: "Piroexplosión",
+        abilityDescription: "Brand lanza una bola de fuego que rebota entre enemigos, causando más daño a objetivos ardiendo."
+    },
+    
+    // Caitlyn
+    {
+        abilityImage: "./assets/abilities/caitlyn/caitlyn-q.png",
+        correctChampion: "Caitlyn",
+        options: ["Caitlyn", "Jinx", "Ashe", "Miss Fortune"],
+        abilityName: "Disparo Pacificador",
+        abilityDescription: "Caitlyn dispara un proyectil penetrante que causa menos daño a objetivos posteriores."
+    },
+    {
+        abilityImage: "./assets/abilities/caitlyn/caitlyn-w.png",
+        correctChampion: "Caitlyn",
+        options: ["Caitlyn", "Nidalee", "Teemo", "Jhin"],
+        abilityName: "Trampa Yordle",
+        abilityDescription: "Caitlyn coloca una trampa que inmoviliza y revela a los enemigos que la pisan."
+    },
+    {
+        abilityImage: "./assets/abilities/caitlyn/caitlyn-e.png",
+        correctChampion: "Caitlyn",
+        options: ["Caitlyn", "Tristana", "Ezreal", "Graves"],
+        abilityName: "Red de Calibre 90",
+        abilityDescription: "Caitlyn retrocede mientras dispara una red que ralentiza al primer enemigo alcanzado."
+    },
+    {
+        abilityImage: "./assets/abilities/caitlyn/caitlyn-r.png",
+        correctChampion: "Caitlyn",
+        options: ["Caitlyn", "Jhin", "Ashe", "Jinx"],
+        abilityName: "As en la Manga",
+        abilityDescription: "Caitlyn apunta cuidadosamente y dispara un proyectil de largo alcance que causa daño masivo."
+    },
+
+    // Cassiopeia
+    {
+        abilityImage: "./assets/abilities/cassiopeia/cassiopeia-q.png",
+        correctChampion: "Cassiopeia",
+        options: ["Cassiopeia", "Malzahar", "Karthus", "Syndra"],
+        abilityName: "Explosión Venenosa",
+        abilityDescription: "Cassiopeia libera veneno que daña y aumenta su velocidad si golpea a un enemigo."
+    },
+{
+        abilityImage: "./assets/abilities/ekko/ekko-q.png",
+        correctChampion: "Ekko",
+        options: ["Ekko", "Ahri", "Fizz", "Zed"],
+        abilityName: "Resonancia Temporal",
+        abilityDescription: "Ekko lanza un dispositivo que causa daño a la ida y al regreso, ralentizando a los enemigos golpeados."
+    },
+    {
+        abilityImage: "./assets/abilities/ekko/ekko-w.png",
+        correctChampion: "Ekko",
+        options: ["Ekko", "Viktor", "Heimerdinger", "Jayce"],
+        abilityName: "Convergencia Paralela",
+        abilityDescription: "Ekko crea una zona temporal que aturde a los enemigos y lo protege si entra en ella."
+    },
+    {
+        abilityImage: "./assets/abilities/ekko/ekko-e.png",
+        correctChampion: "Ekko",
+        options: ["Ekko", "Lucian", "Kassadin", "Katarina"],
+        abilityName: "Inmersión de Fase",
+        abilityDescription: "Ekko rueda y se teletransporta hacia un objetivo, potenciando su siguiente ataque."
+    },
+
+    // Ezreal
+    {
+        abilityImage: "./assets/abilities/ezreal/ezreal-q.png",
+        correctChampion: "Ezreal",
+        options: ["Ezreal", "Lux", "Varus", "Xerath"],
+        abilityName: "Disparo Místico",
+        abilityDescription: "Ezreal dispara un proyectil que aplica efectos de impacto y reduce todos sus enfriamientos si golpea."
+    },
+    {
+        abilityImage: "./assets/abilities/ezreal/ezreal-w.png",
+        correctChampion: "Ezreal",
+        options: ["Ezreal", "Lux", "Ahri", "Leblanc"],
+        abilityName: "Flujo de Esencia",
+        abilityDescription: "Ezreal dispara una orbe de energía que marca a los enemigos para activar efectos adicionales."
+    },
+
+    // Fiora
+    {
+        abilityImage: "./assets/abilities/fiora/fiora-q.png",
+        correctChampion: "Fiora",
+        options: ["Fiora", "Irelia", "Camille", "Riven"],
+        abilityName: "Estocada",
+        abilityDescription: "Fiora se lanza hacia adelante y aplica efectos de impacto, priorizando puntos vitales."
+    },
+    {
+        abilityImage: "./assets/abilities/fiora/fiora-w.png",
+        correctChampion: "Fiora",
+        options: ["Fiora", "Jax", "Shen", "Yasuo"],
+        abilityName: "Riposte",
+        abilityDescription: "Fiora se vuelve inmune a los efectos de control y contraataca, ralentizando el ataque enemigo."
+    },
+
+    // Graves
+    {
+        abilityImage: "./assets/abilities/graves/graves-q.png",
+        correctChampion: "Graves",
+        options: ["Graves", "Lucian", "Caitlyn", "Miss Fortune"],
+        abilityName: "Fin de la Línea",
+        abilityDescription: "Graves dispara dos balas que rebotan en paredes y causan daño adicional al converger."
+    },
+    {
+        abilityImage: "./assets/abilities/graves/graves-w.png",
+        correctChampion: "Graves",
+        options: ["Graves", "Gangplank", "Twisted Fate", "Varus"],
+        abilityName: "Cortina de Humo",
+        abilityDescription: "Graves dispara una granada de humo que reduce la visión y ralentiza a los enemigos."
+    },
+
+    // Jinx
+    {
+        abilityImage: "./assets/abilities/jinx/jinx-q.png",
+        correctChampion: "Jinx",
+        options: ["Jinx", "Tristana", "Miss Fortune", "Aphelios"],
+        abilityName: "¡Cambiazo!",
+        abilityDescription: "Jinx alterna entre su ametralladora y su lanzacohetes, cambiando su estilo de ataque."
+    },
+    {
+        abilityImage: "./assets/abilities/jinx/jinx-w.png",
+        correctChampion: "Jinx",
+        options: ["Jinx", "Caitlyn", "Jhin", "Varus"],
+        abilityName: "¡Zap!",
+        abilityDescription: "Jinx dispara un rayo de energía que ralentiza y daña al primer enemigo golpeado."
+    },
+
+    // Karma
+    {
+        abilityImage: "./assets/abilities/karma/karma-q.png",
+        correctChampion: "Karma",
+        options: ["Karma", "Lux", "Morgana", "Neeko"],
+        abilityName: "Llama Interior",
+        abilityDescription: "Karma lanza una explosión de energía que daña y ralentiza a los enemigos en un área."
+    },
+    {
+        abilityImage: "./assets/abilities/karma/karma-w.png",
+        correctChampion: "Karma",
+        options: ["Karma", "Leblanc", "Lissandra", "Ahri"],
+        abilityName: "Voluntad Inquebrantable",
+        abilityDescription: "Karma crea un vínculo con un enemigo que lo enraíza si no se rompe a tiempo."
+    },
+    {
+        abilityImage: "./assets/abilities/cassiopeia/cassiopeia-w.png",
+        correctChampion: "Cassiopeia",
+        options: ["Cassiopeia", "Singed", "Teemo", "Twitch"],
+        abilityName: "Miasma",
+        abilityDescription: "Cassiopeia crea una nube de veneno que daña y evita que los enemigos usen destello."
+    },
+    {
+        abilityImage: "./assets/abilities/cassiopeia/cassiopeia-e.png",
+        correctChampion: "Cassiopeia",
+        options: ["Cassiopeia", "Karthus", "Ryze", "Malzahar"],
+        abilityName: "Colmillo Gemelo",
+        abilityDescription: "Cassiopeia lanza un colmillo venenoso que causa más daño a enemigos envenenados."
+    },
+    {
+        abilityImage: "./assets/abilities/cassiopeia/cassiopeia-r.png",
+        correctChampion: "Cassiopeia",
+        options: ["Cassiopeia", "Medusa", "Lissandra", "Malzahar"],
+        abilityName: "Mirada Petrificante",
+        abilityDescription: "Cassiopeia petrifica a los enemigos que la miran de frente y ralentiza a los que le dan la espalda."
+    },
+
+    // Diana
+    {
+        abilityImage: "./assets/abilities/diana/diana-q.png",
+        correctChampion: "Diana",
+        options: ["Diana", "Leona", "Ahri", "Syndra"],
+        abilityName: "Golpe Creciente",
+        abilityDescription: "Diana lanza un arco de energía lunar que marca a los enemigos alcanzados."
+    },
+    {
+        abilityImage: "./assets/abilities/diana/diana-r.png",
+        correctChampion: "Diana",
+        options: ["Diana", "Sivir", "Amumu", "yasuo"],
+        abilityName: "Golpe Creciente",
+        abilityDescription: "Diana crea una shockwave que induce a los campeones en rango y los stunea."
+    },
+    {
+        abilityImage: "./assets/abilities/diana/diana-r.png",
+        correctChampion: "Diana",
+        options: ["Diana", "Katarina", "Akali", "Irelia"],
+        abilityName: "Colapso Lunar",
+        abilityDescription: "Diana se lanza hacia un enemigo y crea una explosión de energía lunar."
+    }
+
+
+
+
+
+];
+
+        // Agrega este nuevo array de preguntas para la trivia general
+        const triviaQuestions = [
+    // Preguntas existentes
+    {
+        question: "¿Cuál fue el primer campeón creado para League of Legends?",
+        options: ["Singed", "Annie", "Ryze", "Teemo"],
+        correct: "Singed",
+        explanation: "Singed fue el primer campeón diseñado para League of Legends, aunque no fue el primer campeón lanzado."
+    },
+    {
+        question: "¿Cuántos tipos de dragones elementales existen en el juego?",
+        options: ["3", "4", "5", "6"],
+        correct: "4",
+        explanation: "Hay 4 dragones elementales: Infernal, Océano, Nube y Montaña."
+    },
+    // Nuevas preguntas sobre historia y lore
+    {
+        question: "¿Quiénes son los hermanos que se enfrentaron en la guerra de Jonia?",
+        options: ["Yasuo y Yone", "Darius y Draven", "Garen y Lux", "Kassadin y Malzahar"],
+        correct: "Yasuo y Yone",
+        explanation: "Yasuo y Yone eran hermanos hasta que Yone intentó matar a Yasuo por ser acusado de traición."
+    },
+    {
+        question: "¿Qué región fue destruida por el Vacío?",
+        options: ["Icathia", "Demacia", "Noxus", "Piltover"],
+        correct: "Icathia",
+        explanation: "Icathia fue destruida cuando sus habitantes liberaron el poder del Vacío en su lucha contra Shurima."
+    },
+    // Preguntas sobre mecánicas del juego
+    {
+        question: "¿Cuál es el número máximo de stackeos que puede tener Veigar con su pasiva?",
+        options: ["Infinito", "100", "500", "1000"],
+        correct: "Infinito",
+        explanation: "La pasiva de Veigar puede acumular poder mágico indefinidamente."
+    },
+    {
+        question: "¿Qué objeto mítico NO puede ser comprado por campeones cuerpo a cuerpo?",
+        options: ["Galeforce", "Piedra Lunar", "Vara Imperial", "Bebedor de Sangre"],
+        correct: "Vara Imperial",
+        explanation: "La Vara Imperial es exclusiva para campeones a distancia."
+    },
+    // Preguntas sobre esports
+    {
+        question: "¿Qué equipo ganó el primer Mundial de League of Legends?",
+        options: ["Fnatic", "TSM", "SKT T1", "Cloud9"],
+        correct: "Fnatic",
+        explanation: "Fnatic ganó la Season 1 World Championship en 2011."
+    },
+    {
+        question: "¿Qué jugador es conocido como 'El Demonio Rey'?",
+        options: ["Faker", "Uzi", "Caps", "Perkz"],
+        correct: "Faker",
+        explanation: "Faker es conocido como 'El Demonio Rey' por su dominio histórico en el mid lane."
+    },
+    // Preguntas sobre el mapa
+    {
+        question: "¿Cuánto oro da el primer Herald al matarlo?",
+        options: ["100", "120", "150", "200"],
+        correct: "120",
+        explanation: "El Heraldo de la Grieta otorga 120 de oro al equipo que lo derrota."
+    },
+    {
+        question: "¿Cuántos campamentos de la jungla hay en total en un lado del mapa?",
+        options: ["5", "6", "7", "8"],
+        correct: "6",
+        explanation: "Hay 6 campamentos: Raptores, Lobos, Gromp, Piedraazul, Golems y Rojo."
+    },
+    // Preguntas sobre campeones
+    {
+        question: "¿Qué campeón tiene la habilidad pasiva más larga del juego?",
+        options: ["Ornn", "Pyke", "Bard", "Senna"],
+        correct: "Ornn",
+        explanation: "La pasiva de Ornn es la más larga, describiendo múltiples efectos y su habilidad para forjar objetos."
+    },
+    {
+        question: "¿Cuál es el único campeón que puede subir de nivel más allá del 18?",
+        options: ["Sylas", "Senna", "Veigar", "Viktor"],
+        correct: "Sylas",
+        explanation: "En el modo Ultra Rapid Fire (URF), Sylas puede superar el nivel 18."
+    },
+    // Preguntas sobre la comunidad
+    {
+        question: "¿Qué streamer popularizó la frase 'Better jungler wins'?",
+        options: ["Tyler1", "Nightblue3", "IWillDominate", "Trick2g"],
+        correct: "Nightblue3",
+        explanation: "Nightblue3 popularizó esta frase que se volvió un meme en la comunidad."
+    },
+    {
+        question: "¿Qué campeón fue rediseñado debido a una broma de April Fools?",
+        options: ["Urf", "Urgot", "Teemo", "Rammus"],
+        correct: "Urgot",
+        explanation: "El rediseño de Urgot se inspiró en parte en una broma del Día de los Inocentes."
+    },
+    // Preguntas sobre aspectos técnicos
+    {
+        question: "¿Cuál es el nivel máximo de maestría de campeón?",
+        options: ["5", "6", "7", "8"],
+        correct: "7",
+        explanation: "El nivel máximo de maestría de campeón es 7, representado por el emblema azul brillante."
+    }
+];
+
+        // Elementos del DOM
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('startButton');
+        const loadingScreen = document.getElementById('loading-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const abilityImage = document.getElementById('ability-image');
+        const answersContainer = document.getElementById('answers-container');
+        const scoreDisplay = document.getElementById('score-display');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const scoreboardElement = document.getElementById('scoreboard');
+        const playerNameInput = document.getElementById('playerName');
+        const champGenButton = document.getElementById('champGenButton');
+        const champGenModal = document.getElementById('champGenModal');
+        const closeChampGen = document.getElementById('closeChampGen');
+        const generateButton = document.getElementById('generate-button');
+        const resultContainer = document.getElementById('result-container');
+        const championDisplay = document.getElementById('champion-display');
+
+        // Variables de estado del juego
+        let gameQuestions = [];
+        const TOTAL_QUESTIONS = 10;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+        let playerName = "";
+
+        // Función para barajar un array (Algoritmo de Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Reemplaza las funciones de carga de imágenes con estas versiones simplificadas
+const imageCache = new Map();
+
+function preloadImage(url) {
+    if (imageCache.has(url)) {
+        return Promise.resolve(imageCache.get(url));
+    }
+
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            imageCache.set(url, url);
+            resolve(url);
+        };
+        img.onerror = () => {
+            console.warn(`Failed to load image: ${url}`);
+            reject(new Error(`Failed to load image: ${url}`));
+        };
+        img.src = url;
+    });
+}
+
+        // Función para empezar el juego
+        function startGame() {
+            playerName = playerNameInput.value.trim();
+            if (!playerName) {
+                playerNameInput.classList.add('border-red-500');
+                playerNameInput.placeholder = "¡Ingresa tu nombre!";
+                playerNameInput.focus();
+                return;
+            }
+            
+            playerNameInput.classList.remove('border-red-500');
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            // Preparar las preguntas del juego
+            gameQuestions = [...questions];
+            shuffleArray(gameQuestions);
+            gameQuestions = gameQuestions.slice(0, TOTAL_QUESTIONS);
+            
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            // Precargar la primera imagen antes de mostrar la pregunta
+            const firstQuestion = gameQuestions[0];
+            preloadImage(firstQuestion.abilityImage)
+                .then(() => {
+                    loadQuestion();
+                })
+                .catch(() => {
+                    loadQuestion(); // Continuar incluso si falla la carga
+                });
+        }
+        
+        // Función para actualizar el marcador
+        function updateScoreDisplay() {
+            scoreDisplay.innerHTML = `
+                <span>Puntuación: ${score}</span>
+                <span class="text-sm ml-2">${currentQuestionIndex + 1}/${TOTAL_QUESTIONS}</span>
+            `;
+        }
+
+        // Función para cargar la siguiente pregunta
+        function loadQuestion() {
+            if (currentQuestionIndex >= TOTAL_QUESTIONS) {
+                endGame();
+                return;
+            }
+
+            answered = false;
+            feedbackMessage.textContent = '';
+            abilityImage.classList.remove('correct-flash', 'incorrect-shake');
+
+            const currentQuestion = gameQuestions[currentQuestionIndex];
+            
+            // Cargar imagen
+            abilityImage.src = currentQuestion.abilityImage;
+
+            // Preparar opciones
+            shuffleArray(currentQuestion.options);
+            answersContainer.innerHTML = '';
+            currentQuestion.options.forEach(championName => {
+                const button = document.createElement('button');
+                button.textContent = championName;
+                button.className = 'answer-button text-white py-3 px-4 rounded-lg font-semibold text-lg hover:bg-gray-600';
+                button.onclick = () => handleAnswerClick(championName);
+                answersContainer.appendChild(button);
+            });
+
+            updateScoreDisplay();
+        }
+
+        // Manejar el clic en un botón de respuesta
+        function handleAnswerClick(championName) {
+            if (answered) return;
+            answered = true;
+
+            const currentQuestion = gameQuestions[currentQuestionIndex];
+            const isCorrect = championName === currentQuestion.correctChampion;
+            const buttons = answersContainer.querySelectorAll('.answer-button');
+
+            buttons.forEach(button => {
+                button.classList.add('disabled');
+                button.style.pointerEvents = 'none';
+
+                if (button.textContent === currentQuestion.correctChampion) {
+                    button.classList.add('correct');
+                } else if (button.textContent === championName) {
+                    button.classList.add('incorrect');
+                }
+            });
+
+            if (isCorrect) {
+                score++;
+                updateScoreDisplay();
+                feedbackMessage.innerHTML = `
+                    <div class="text-green-500">¡Correcto!</div>
+                    <div class="text-lg mt-2">
+                        <span class="text-purple-400 font-bold">${currentQuestion.abilityName}</span>
+                        <p class="text-base mt-1 text-gray-300">${currentQuestion.abilityDescription}</p>
+                    </div>
+                    <div class="text-sm mt-2 text-gray-400">Pregunta ${currentQuestionIndex + 1} de ${TOTAL_QUESTIONS}</div>
+                `;
+                abilityImage.classList.add('correct-flash');
+            } else {
+                feedbackMessage.innerHTML = `
+                    <div class="text-red-500">¡Incorrecto! La respuesta era ${currentQuestion.correctChampion}</div>
+                    <div class="text-lg mt-2">
+                        <span class="text-purple-400 font-bold">${currentQuestion.abilityName}</span>
+                        <p class="text-base mt-1 text-gray-300">${currentQuestion.abilityDescription}</p>
+                    </div>
+                    <div class="text-sm mt-2 text-gray-400">Pregunta ${currentQuestionIndex + 1} de ${TOTAL_QUESTIONS}</div>
+                `;
+                abilityImage.classList.add('incorrect-shake');
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < TOTAL_QUESTIONS) {
+                    loadQuestion();
+                } else {
+                    endGame();
+                }
+            }, 4000);
+        }
+        
+        // Finalizar el juego y mostrar el resultado final
+        function endGame() {
+            gameScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            addScore(playerName, score);
+            renderScoreboard();
+            alert(`¡Juego terminado! ${playerName}, tu puntuación final es: ${score} de ${TOTAL_QUESTIONS}.`);
+        }
+
+        // --- Persistencia de puntajes con localStorage ---
+        function getScoreboard() {
+            try {
+                return JSON.parse(localStorage.getItem('lolSkillQuizScores') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function saveScoreboard(scores) {
+            localStorage.setItem('lolSkillQuizScores', JSON.stringify(scores));
+        }
+
+        function addScore(name, score) {
+            const scores = getScoreboard();
+            scores.push({ name, score });
+            scores.sort((a, b) => b.score - a.score);
+            saveScoreboard(scores.slice(0, 10));
+        }
+
+        function renderScoreboard() {
+            const scores = getScoreboard();
+            scoreboardElement.innerHTML = '';
+            if (scores.length === 0) {
+                scoreboardElement.innerHTML = '<li class="text-gray-400">Sin puntajes aún.</li>';
+                return;
+            }
+            scores.forEach((entry, idx) => {
+                scoreboardElement.innerHTML += `
+                    <li class="flex justify-between items-center bg-[#23283a] p-3 rounded-lg shadow-md">
+                        <div class="flex items-center">
+                            <span class="font-bold w-6 text-center">${idx + 1}.</span> 
+                            <span class="text-white ml-2 truncate">${entry.name}</span>
+                        </div>
+                        <span class="text-indigo-400 font-bold">${entry.score}</span>
+                    </li>
+                `;
+            });
+        }
+
+        // Lista de campeones
+        const champions = [
+            'Aatrox', 'Ahri', 'Akali', 'Akshan', 'Alistar', 'Amumu', 'Anivia', 'Annie', 'Aphelios', 'Ashe',
+            'Aurelion Sol', 'Azir', 'Bard', 'Blitzcrank', 'Brand', 'Braum', 'Caitlyn', 'Camille', 'Cassiopeia', 'Cho Gath',
+            'Corki', 'Darius', 'Diana', 'Draven', 'Ekko', 'Elise', 'Evelynn', 'Ezreal', 'Fiddlesticks', 'Fiora',
+            'Fizz', 'Garen', 'Gnar', 'Gragas', 'Graves', 'Gwen', 'Hecarim', 'Heimerdinger', 'Illaoi', 'Irelia',
+            'Janna', 'Jarvan IV', 'Jax', 'Jayce', 'Jhin', 'Jinx', 'Kai Sa', 'Kalista', 'Karma', 'Karthus',
+            'Kassadin', 'Katarina', 'Kayle', 'Kayn', 'Kennen', 'Kha Zix', 'LeBlanc', 'Lee Sin', 'Leona', 'Lillia',
+            'Lissandra', 'Lucian', 'Lulu', 'Lux', 'Malphite', 'Malzahar', 'Maokai', 'Miss Fortune', 'Mordekaiser',
+            'Morgana', 'Nami', 'Nasus', 'Nautilus', 'Neeko', 'Nidalee', 'Nocturne', 'Nunu', 'Olaf', 'Orianna',
+            'Ornn', 'Pantheon', 'Poppy', 'Pyke', 'Qiyana', 'Quinn', 'Rakan', 'Rammus', 'Rek Sai', 'Renekton',
+            'Rengar', 'Riven', 'Rumble', 'Ryze', 'Samira', 'Sejuani', 'Senna', 'Seraphine', 'Sett', 'Shaco',
+            'Shen', 'Shyvana', 'Singed', 'Sion', 'Sivir', 'Sona', 'Soraka', 'Swain', 'Sylas', 'Syndra',
+            'Tahm Kench', 'Taliyah', 'Talon', 'Taric', 'Teemo', 'Thresh', 'Tristana', 'Trundle', 'Tryndamere', 'Twisted Fate',
+            'Twitch', 'Udyr', 'Urgot', 'Varus', 'Vayne', 'Veigar', 'Vel Koz', 'Vex', 'Vi', 'Viktor',
+            'Vladimir', 'Volibear', 'Warwick', 'Wukong', 'Xayah', 'Xerath', 'Xin Zhao', 'Yasuo', 'Yone',
+            'Zed', 'Zeri', 'Ziggs', 'Zilean', 'Zyra'
+        ];
+
+        // Agregar este objeto con los campeones por rol
+        const championsByRole = {
+            top: [
+                'Aatrox', 'Camille', 'Cho\'Gath', 'Darius', 'Fiora', 'Garen', 'Gnar', 'Gwen', 
+                'Illaoi', 'Irelia', 'Jax', 'Jayce', 'Kayle', 'Kennen', 'Malphite', 'Mordekaiser', 
+                'Nasus', 'Ornn', 'Pantheon', 'Poppy', 'Renekton', 'Riven', 'Sett', 'Shen', 
+                'Singed', 'Sion', 'Teemo', 'Urgot', 'Volibear', 'Yorick'
+            ],
+            jungle: [
+                'Amumu', 'Bel\'Veth', 'Diana', 'Ekko', 'Elise', 'Evelynn', 'Fiddlesticks', 
+                'Gragas', 'Graves', 'Hecarim', 'Ivern', 'Jarvan IV', 'Karthus', 'Kayn', 
+                'Kindred', 'Lee Sin', 'Master Yi', 'Nidalee', 'Nocturne', 'Nunu & Willump', 
+                'Rammus', 'Rek\'Sai', 'Sejuani', 'Shaco', 'Trundle', 'Udyr', 'Vi', 'Viego', 
+                'Warwick', 'Xin Zhao', 'Zac'
+            ],
+            mid: [
+                'Ahri', 'Akali', 'Anivia', 'Annie', 'Aurelion Sol', 'Azir', 'Cassiopeia', 
+                'Fizz', 'Galio', 'Kassadin', 'Katarina', 'LeBlanc', 'Lissandra', 'Lux', 
+                'Malzahar', 'Neeko', 'Orianna', 'Qiyana', 'Ryze', 'Sylas', 'Syndra', 
+                'Twisted Fate', 'Veigar', 'Vel\'Koz', 'Viktor', 'Vladimir', 'Xerath', 
+                'Yasuo', 'Yone', 'Zed', 'Zoe'
+            ],
+            adc: [
+                'Aphelios', 'Ashe', 'Caitlyn', 'Draven', 'Ezreal', 'Jhin', 'Jinx', 'Kai\'Sa', 
+                'Kalista', 'Kog\'Maw', 'Lucian', 'Miss Fortune', 'Nilah', 'Samira', 'Senna', 
+                'Sivir', 'Tristana', 'Twitch', 'Varus', 'Vayne', 'Xayah', 'Zeri'
+            ],
+            support: [
+                'Alistar', 'Bard', 'Blitzcrank', 'Brand', 'Braum', 'Janna', 'Karma', 'Leona', 
+                'Lulu', 'Milio', 'Morgana', 'Nami', 'Nautilus', 'Pyke', 'Rakan', 'Rell', 
+                'Renata Glasc', 'Seraphine', 'Sona', 'Soraka', 'Swain', 'Tahm Kench', 
+                'Taric', 'Thresh', 'Yuumi', 'Zilean', 'Zyra'
+            ]
+        };
+
+        // Modificar la funcionalidad del generador
+        let selectedRole = 'random';
+
+        // Asegúrate de tener estos elementos del DOM correctamente seleccionados
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementos del DOM para el juego de habilidades
+            const startScreen = document.getElementById('start-screen');
+            const startButton = document.getElementById('startButton');
+            const gameScreen = document.getElementById('game-screen');
+            const abilityImage = document.getElementById('ability-image');
+            const answersContainer = document.getElementById('answers-container');
+            const scoreDisplay = document.getElementById('score-display');
+            const feedbackMessage = document.getElementById('feedback-message');
+            const scoreboardElement = document.getElementById('scoreboard');
+            const playerNameInput = document.getElementById('playerName');
+
+            // Elementos del DOM para el generador de campeones
+            const champGenButton = document.getElementById('champGenButton');
+            const champGenModal = document.getElementById('champGenModal');
+            const closeChampGen = document.getElementById('closeChampGen');
+            const championDisplay = document.getElementById('champion-display');
+
+            // Elementos del DOM para la trivia
+            const triviaButton = document.getElementById('triviaButton');
+            const triviaModal = document.getElementById('triviaModal');
+            const closeTrivia = document.getElementById('closeTrivia');
+            const nextTrivia = document.getElementById('nextTrivia');
+
+            // Event listeners para el juego de habilidades
+            startButton.addEventListener('click', startGame);
+            playerNameInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter') startGame();
+            });
+
+            // Event listeners para el generador de campeones
+            champGenButton.addEventListener('click', () => {
+                champGenModal.classList.remove('hidden');
+                // Mostrar el modal con animación
+                setTimeout(() => {
+                    champGenModal.querySelector('.glass-card').classList.remove('scale-95', 'opacity-0');
+                }, 10);
+            });
+
+            closeChampGen.addEventListener('click', () => {
+                champGenModal.querySelector('.glass-card').classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    champGenModal.classList.add('hidden');
+                }, 300);
+            });
+
+            // Event listeners para los botones de rol
+            document.querySelectorAll('.role-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remover selección previa
+                    document.querySelectorAll('.role-button').forEach(btn => 
+                        btn.classList.remove('selected'));
+                    
+                    // Marcar el nuevo botón como seleccionado
+                    button.classList.add('selected');
+                    
+                    // Guardar el rol seleccionado y generar campeón
+                    selectedRole = button.dataset.role;
+                    generateRandomChampion();
+                });
+            });
+
+            // Función para generar un campeón aleatorio
+            function generateRandomChampion() {
+                let champion;
+                if (selectedRole === 'random') {
+                    // Seleccionar cualquier campeón de la lista completa
+                    champion = champions[Math.floor(Math.random() * champions.length)];
+                } else {
+                    // Seleccionar un campeón del rol específico
+                    const roleChampions = championsByRole[selectedRole];
+                    if (roleChampions && roleChampions.length > 0) {
+                        champion = roleChampions[Math.floor(Math.random() * roleChampions.length)];
+                    } else {
+                        champion = "Error: No hay campeones disponibles";
+                    }
+                }
+                
+                // Aplicar animación al cambiar el campeón
+                championDisplay.classList.add('scale-0');
+                setTimeout(() => {
+                    championDisplay.textContent = champion;
+                    championDisplay.classList.remove('scale-0');
+                }, 300);
+            }
+
+            // Cerrar modal al hacer clic fuera
+            champGenModal.addEventListener('click', (e) => {
+                if (e.target === champGenModal) {
+                    champGenModal.querySelector('.glass-card').classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => {
+                        champGenModal.classList.add('hidden');
+                    }, 300);
+                }
+            });
+
+            // Cerrar con la tecla Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !champGenModal.classList.contains('hidden')) {
+                    champGenModal.querySelector('.glass-card').classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => {
+                        champGenModal.classList.add('hidden');
+                    }, 300);
+                }
+            });
+
+            // Event listeners para la trivia
+            triviaButton.addEventListener('click', () => {
+                triviaModal.classList.remove('hidden');
+                startTrivia();
+            });
+
+            closeTrivia.addEventListener('click', () => {
+                triviaModal.classList.add('hidden');
+            });
+
+            nextTrivia.addEventListener('click', () => {
+                currentTriviaIndex++;
+                if (currentTriviaIndex < triviaQuestions.length) {
+                    showTriviaQuestion();
+                } else {
+                    alert(`¡Trivia completada! Tu puntuación final es: ${triviaScore}/${triviaQuestions.length}`);
+                    triviaModal.classList.add('hidden');
+                }
+            });
+
+            // Cerrar trivia con Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !triviaModal.classList.contains('hidden')) {
+                    triviaModal.classList.add('hidden');
+                }
+            });
+
+            // Cerrar trivia al hacer clic fuera
+            triviaModal.addEventListener('click', (e) => {
+                if (e.target === triviaModal) {
+                    triviaModal.classList.add('hidden');
+                }
+            });
+        });
+
+        // --- Renderiza el scoreboard al cargar la página ---
+        renderScoreboard();
+
+        // --- Lógica de la trivia general ---
+        let currentTriviaIndex = 0;
+        let triviaScore = 0;
+
+        function startTrivia() {
+            currentTriviaIndex = 0;
+            triviaScore = 0;
+            showTriviaQuestion();
+        }
+
+        function showTriviaQuestion() {
+            const question = triviaQuestions[currentTriviaIndex];
+            const triviaContainer = document.getElementById('triviaContainer');
+            const triviaQuestion = document.getElementById('triviaQuestion');
+            const triviaOptions = document.getElementById('triviaOptions');
+            const triviaFeedback = document.getElementById('triviaFeedback');
+            const nextButton = document.getElementById('nextTrivia');
+            
+            triviaQuestion.textContent = question.question;
+            triviaOptions.innerHTML = '';
+            triviaFeedback.classList.add('hidden');
+            nextButton.classList.add('hidden');
+
+            // Opciones con mejor estilo
+            const shuffledOptions = [...question.options];
+            shuffleArray(shuffledOptions);
+            
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'w-full p-4 text-lg font-semibold rounded-lg bg-gray-700 hover:bg-gray-600 transition-all duration-300 transform hover:-translate-y-1';
+                button.textContent = option;
+                button.onclick = () => handleTriviaAnswer(option);
+                triviaOptions.appendChild(button);
+            });
+            
+            document.getElementById('triviaScore').textContent = 
+                `Puntuación: ${triviaScore}/${triviaQuestions.length}`;
+        }
+
+        function handleTriviaAnswer(selectedAnswer) {
+            const question = triviaQuestions[currentTriviaIndex];
+            const buttons = document.querySelectorAll('#triviaOptions button');
+            const triviaFeedback = document.getElementById('triviaFeedback');
+            const triviaExplanation = document.getElementById('triviaExplanation');
+            const nextButton = document.getElementById('nextTrivia');
+            
+            buttons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === question.correct) {
+                    button.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+                    button.classList.add('bg-green-600', 'hover:bg-green-700');
+                } else if (button.textContent === selectedAnswer && selectedAnswer !== question.correct) {
+                    button.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+                    button.classList.add('bg-red-600', 'hover:bg-red-700');
+                }
+            });
+            
+            if (selectedAnswer === question.correct) {
+                triviaScore++;
+            }
+            
+            triviaExplanation.textContent = question.explanation;
+            triviaFeedback.classList.remove('hidden');
+            nextButton.classList.remove('hidden');
+            
+            // Actualiza la puntuación con animación
+            const scoreElement = document.getElementById('triviaScore');
+            scoreElement.classList.add('scale-110');
+            scoreElement.textContent = `Puntuación: ${triviaScore}/${triviaQuestions.length}`;
+            setTimeout(() => scoreElement.classList.remove('scale-110'), 300);
+        }
+    </script>
+</body>
+</html>
